@@ -53,9 +53,9 @@ public class MobileAccountRecoveryServlet extends HttpServlet {
 	 		status = "Invalid email";
 	 	}
 	 	else{
-	 		account.setNeedReset(true);
+	 		//account.setNeedReset(true);
 	 		MailManager em = MailManager.getInstance();
-	 		em.sendPasswordRecoveryLink(email, "www.google.com");
+	 		em.sendPasswordRecoveryLink(account, "the key");
 	 		
 	 		status = "Completed";
 	 	}
