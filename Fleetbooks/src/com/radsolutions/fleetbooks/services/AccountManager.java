@@ -21,7 +21,9 @@ public class AccountManager {
 	
 	private static final String ADD_ACCOUNT = "INSERT INTO account(firstname, lastname, email, password, phone, type, approved) VALUES (?, ?, ?, ?, ?, ?, ?)";
 	
-	private static final String UPDATE_ACCOUNT = "UPDATE ";
+	private static final String UPDATE_ACCOUNT = "UPDATE account SET firstname=?, lastname=?, email=?, password=?, phone=?, type=?, approved=? WHERE id = ?";
+	
+	private static final String DELETE_ACCOUNT = "UPDATE account SET approved = FALSE WHERE id = ?";
 	
 	private static final AccountManager singleton = new AccountManager();
 
@@ -111,13 +113,13 @@ public class AccountManager {
 			conn.setAutoCommit(false);
 
 			PreparedStatement stmt = conn.prepareStatement(ADD_ACCOUNT);
-			stmt.setString(2, a.getFirstName());
-			stmt.setString(3, a.getLastName());
-			stmt.setString(4, a.getEmail());
-			stmt.setString(5, a.getPassword());
-			stmt.setString(6, a.getPhone());
-			stmt.setString(7, a.getType());
-			stmt.setBoolean(8, a.isApproved());
+			stmt.setString(1, a.getFirstName());
+			stmt.setString(2, a.getLastName());
+			stmt.setString(3, a.getEmail());
+			stmt.setString(4, a.getPassword());
+			stmt.setString(5, a.getPhone());
+			stmt.setString(6, a.getType());
+			stmt.setBoolean(7, a.isApproved());
 
 			status = stmt.executeUpdate();
 			if (status != 1){
@@ -157,10 +159,61 @@ public class AccountManager {
 		return true;
 	}
 	
+	//modify
+	public boolean editAccount(Account a){
+		Connection conn = null;
+		int status;
+		try{
+			conn = DataSource.getInstance().getJDBCConnection();
+			
+			PreparedStatement stmt = conn.prepareStatement(UPDATE_ACCOUNT);
+			//UPDATE account SET firstname=?, lastname=?, email=?, password=?, phone=?, type=?, approved=? WHERE id = ?
+			stmt.setString(1, a.getFirstName());
+			stmt.setString(2, a.getLastName());
+			stmt.setString(3, a.getEmail());
+			stmt.setString(4, a.getPassword());
+			stmt.setString(4, a.getPhone());
+			stmt.setString(5, a.getType());
+			stmt.setBoolean(7, a.isApproved());
+			stmt.setInt(7, a.getId());
+			
+			status = stmt.executeUpdate();
+			if (status != 1){
+				return false;
+			}
+		}
+		catch(Exception e){
+			return false;
+		}
+		finally{
+			this.closeConnection(conn);
+		}
+		return true;
+	}
+	
 	//delete
-	public Account deleteAccount(int id) {
-		// TODO Auto-generated method stub
-		return null;
+	public boolean deleteAccount(int id) {
+		Connection conn = null;
+		int status;
+		try{
+			conn = DataSource.getInstance().getJDBCConnection();
+			
+			PreparedStatement stmt = conn.prepareStatement(DELETE_ACCOUNT);
+
+			stmt.setInt(1, id);
+			
+			status = stmt.executeUpdate();
+			if (status != 1){
+				return false;
+			}
+		}
+		catch(Exception e){
+			return false;
+		}
+		finally{
+			this.closeConnection(conn);
+		}
+		return true;
 	}
 
 	//Utils

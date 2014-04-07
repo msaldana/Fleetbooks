@@ -37,9 +37,9 @@ public class DeleteUserServlet extends HttpServlet {
 		int id = Integer.valueOf(request.getParameter("id"));
 		
 		AccountManager am = AccountManager.getInstance();
-		Account account = am.deleteAccount(id);
+		boolean result = am.deleteAccount(id);
 		
-		request.setAttribute("account", account);
+		request.setAttribute("result", result);
 		String nextUrl = "./UsersAdmin.jsp";
 		RequestDispatcher dispatcher = request.getRequestDispatcher(nextUrl); 
 		dispatcher.forward(request, response);
