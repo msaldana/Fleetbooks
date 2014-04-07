@@ -9,20 +9,24 @@ import com.radsolutions.fleetbooks.DTO.Account;
 import com.radsolutions.fleetbooks.datasource.DataSource;
 
 /**
- * 
+ * Handles the communication from the applications to the DB to manage user accounts
  * @author Zemuel Roman
  * 
  */
 public class AccountManager {
 
+	//Querries to get data from DB
 	private static final String GET_ADMIN_ACCOUNTS = "SELECT * FROM Account WHERE type = 'Administrator'";
 	private static final String GET_USER_BY_EMAIL = "SELECT * FROM Account WHERE email = ?";
 	private static final String GET_USER_BY_ID = "SELECT * FROM Account WHERE id = ?";
 	
+	//Add data to DB
 	private static final String ADD_ACCOUNT = "INSERT INTO account(firstname, lastname, email, password, phone, type, approved) VALUES (?, ?, ?, ?, ?, ?, ?)";
 	
+	//Modify DB data
 	private static final String UPDATE_ACCOUNT = "UPDATE account SET firstname=?, lastname=?, email=?, password=?, phone=?, type=?, approved=? WHERE id = ?";
 	
+	//Delete account from system (mar approved = FALSE in DB)
 	private static final String DELETE_ACCOUNT = "UPDATE account SET approved = FALSE WHERE id = ?";
 	
 	private static final AccountManager singleton = new AccountManager();
@@ -36,7 +40,11 @@ public class AccountManager {
 		return singleton;
 	}
 
-	//Get
+	/**
+	 * Fetches an user in the DB with the given email
+	 * @param email User email
+	 * @return user matching the given email 
+	 */
 	public Account getUserByEmail(String email){
 		Account result = null;
 		Connection conn = null;
@@ -59,6 +67,11 @@ public class AccountManager {
 		return result;
 	}
 
+	/**
+	 * Fetches the DB for an account with the given id
+	 * @param id The account id
+	 * @return The account
+	 */
 	public Account getUserById(int id){
 		Account result = null;
 		Connection conn = null;
@@ -81,6 +94,10 @@ public class AccountManager {
 		return result;
 	}
 
+	/**
+	 * Finds all the Administrator accounts in the DB
+	 * @return List of all admins
+	 */
 	public ArrayList<Account> getAllAdministrators(){
 		ArrayList<Account> result = new ArrayList<Account>();
 		Account indRes;
@@ -104,7 +121,11 @@ public class AccountManager {
 		return result;
 	}
 
-	//Add
+	/**
+	 * Adds account to the DB and creates a new account request notification. Returns true if successful, false otherwise
+	 * @param a The account to add
+	 * @return true if successful, false otherwise
+	 */
 	public boolean addAccount(Account a) {		
 		Connection conn = null;
 		int status;
@@ -159,7 +180,11 @@ public class AccountManager {
 		return true;
 	}
 	
-	//modify
+	/**
+	 * Modifies the account a in the DB with the values given in the object
+	 * @param a The modified account
+	 * @return true if successful, false otherwise
+	 */
 	public boolean editAccount(Account a){
 		Connection conn = null;
 		int status;
@@ -191,7 +216,11 @@ public class AccountManager {
 		return true;
 	}
 	
-	//delete
+	/**
+	 * Removes an account form the system marking it as not approved in the DB
+	 * @param id the id of the account to remove
+	 * @return true if successful, false otherwise 
+	 */
 	public boolean deleteAccount(int id) {
 		Connection conn = null;
 		int status;
@@ -216,7 +245,12 @@ public class AccountManager {
 		return true;
 	}
 
-	//Utils
+	/**
+	 * Utility method to add the result set columns to an account object in the respective instance fields
+	 * @param a The account object where the result set columns will be saved
+	 * @param rs The result set
+	 * @throws Exception  if a column index is not valid
+	 */
 	private void createAccountFromRS(Account a, ResultSet rs) throws Exception{
 		a.setId(rs.getInt(1));
 		a.setFirstName(rs.getString(2));
@@ -228,6 +262,10 @@ public class AccountManager {
 		a.setApproved(rs.getBoolean(8));
 	}
 
+	/**
+	 * Utility method to close a connection
+	 * @param c The connection
+	 */
 	private void closeConnection(Connection c){
 		if (c != null){
 			try {
