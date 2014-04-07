@@ -43,7 +43,7 @@ public class NotificationManager {
 		return singleton;
 	}
 	/**
-	 * 
+	 * Get from the db all the visible notifications
 	 * @return an array list with all the visible notifications
 	 */
 	public ArrayList<Notification> getNotifications(){
