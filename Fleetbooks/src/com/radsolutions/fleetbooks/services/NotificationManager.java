@@ -26,13 +26,14 @@ public class NotificationManager {
 	private static final String GET_NEW_ACCOUNT_REQUEST_BY_ID = "SELECT * FROM newaccountrequest WHERE id = ?";
 	
 	private static final String ADD_NOTIFICATION = "INSERT INTO notification (type, sender, date, issolved, isvisible, accountid) VALUES (?, ?, ?, ?, ?, ?)" ;
-	private static final String ADD_EQUIPMENT_REQUEST = null;
-	private static final String ADD_MAINTENANCE_NOTIFICATION = null;
-	private static final String ADD_MALFUNCTION_REQUEST = null;
-	private static final String ADD_NEW_ACCOUNT_REQUEST = null;
-	private static final String ADD_EQUIPMENT_CHECKOUT = null;
+	private static final String ADD_EQUIPMENT_REQUEST = "INSERT INTO equipmentrequest VALUES (?, ?, ?, ?, ?)";
+	private static final String ADD_MAINTENANCE_NOTIFICATION = "INSERT INTO maintenancenotification VALUES (?, ?)";
+	private static final String ADD_MALFUNCTION_REQUEST = "INSERT INTO malfunctionrequest VALUES (?, ?, ?)";
+	private static final String ADD_EQUIPMENT_CHECKOUT = "INSERT INTO equipmentcheckout VALUES (?, ?, ?, ?)";
+	private static final String ADD_NEW_ACCOUNT_REQUEST = "INSERT INTO newacountrequest VALUES (?, ?)";
 
-	private static final String RESOLVE_NOTIFICATION_BY_ID = null;
+	private static final String RESOLVE_NOTIFICATION_BY_ID = "UPDATE notification SET issolved = TRUE WHERE id = ?";
+	private static final String DELETE_NOTIFICATION_BY_ID = "UPDATE notification SET isvisible = TRUE WHERE id = ?";
 
 	public NotificationManager() {
 		// TODO Auto-generated constructor stub
@@ -217,10 +218,30 @@ public class NotificationManager {
 		try{
 			conn = DataSource.getInstance().getJDBCConnection();
 			
-			Notification n = new Notification();
-			
 			PreparedStatement stmt = conn.prepareStatement(RESOLVE_NOTIFICATION_BY_ID);
-			stmt.setBoolean(1, true);
+			stmt.setInt(1, id);
+			status = stmt.executeUpdate();
+			if (status != 1){
+				return false;
+			}
+		}
+		catch(Exception e){
+			return false;
+		}
+		finally{
+			this.closeConnection(conn);
+		}
+		return true;
+	}
+	
+	public boolean deleteNotification(int id){
+		Connection conn = null;
+		int status;
+		try{
+			conn = DataSource.getInstance().getJDBCConnection();
+			
+			PreparedStatement stmt = conn.prepareStatement(DELETE_NOTIFICATION_BY_ID);
+			stmt.setInt(1, id);
 			status = stmt.executeUpdate();
 			if (status != 1){
 				return false;
