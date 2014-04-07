@@ -23,6 +23,7 @@ import javax.mail.internet.MimeMultipart;
 import com.radsolutions.fleetbooks.DTO.Account;
 import com.radsolutions.fleetbooks.DTO.Equipment;
 import com.radsolutions.fleetbooks.DTO.Part;
+import com.radsolutions.fleetbooks.DTO.Project;
 
 
 /**
@@ -209,8 +210,8 @@ public class MailManager
 	 * Sends a formated e-mail to all of the system's administrators, that states
 	 * that an equipment is in need of maintenance. Populates the HTML
 	 * e-mail with the equipment's data and .
-	 * @param user - Account object belonging to the user that solicited
-	 * account creation.
+	 * @param equipment - Equipment object whose part needs maintenance
+	 * @param part - Part object in need of maintenance
 	 */
 	
 	public void sendMaintenanceNotification(Equipment equipment, Part part)
@@ -225,27 +226,25 @@ public class MailManager
 				"25px 0 25px 0; font-size:20px\">");
 		// Include Equipment's Company ID
 		body.append("Part Maintenance Required for Equipment: "+equipment.getCompanyId()+".");
-		body.append("</td></tr><tr><td align=\"center\" style=\"padding: 5px 0 25px 0; font-size:12px\"></td></tr><tr><td><table border=\"none !important\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\"><tr><td style=\"padding:10px 0px 10px 30px;\"><a style=\"font-variant:normal;\"><img src=\"cid:image2\" style=\"padding: 0 0 0 30px;\"/>");
+		body.append("</td></tr><tr><td align=\"center\" style=\"padding: 5px 0 25px 0; font-size:12px\"></td></tr><tr><td><table border=\"none !important\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\"><tr><td style=\"padding:10px 0px 10px 30px;\"><a >");
 		// Include part ID 
-		body.append("Name: "+part.getName());	
-		body.append("</a></td></tr><tr><td style=\"padding:10px 0px 10px 30px;\"><a style=\"font-variant:normal;\">");
+		body.append("Part Name: "+part.getName());	
+		body.append("</a></td></tr><tr><td style=\"padding:10px 0px 10px 30px;\"><a>");
 		// Include part Brand
 		body.append("Brand: "+part.getBrand());
 		// Rest of HTML
-		body.append("</a></td></tr><tr><td align=\"center\" style=\"padding:10px 0px 10px 30px;\"><a href=\"#\"> <img src=\"cid:image4\" /></a></td></tr></table></td></tr></table></td></tr><tr><td bgcolor=\"#ECE9D8\" style=\"padding: 30px 30px 30px 30px;\"><table border=\"none !important\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\"><tr><td width=\"40%\"><a style=\"font-family:arial,helvetica,sans-serif; font-size: 10px;\">This notification was sent because you requested registration at Fleetbooks for Tamrio.<br></br>Developed by RAD Solutions</a></td><td align=\"right\"><a style=\"font-family:arial,helvetica,sans-serif; font-size: 10px;\">Parque Industrial del Oeste#31 Rochelaise<br>Mayaguez, P.R. 00682 <br>Tel. (787) 805-4120</a> </td></tr></table></td></tr></table></td></tr></table></body>" +
+		body.append("</a></td></tr><tr><td align=\"center\" style=\"padding:10px 0px 10px 30px;\"><a href=\"http://ec2-54-214-69-174.us-west-2.compute.amazonaws.com:8080/FleetBooksDB/\"> <img src=\"cid:image4\" /></a></td></tr></table></td></tr></table></td></tr><tr><td bgcolor=\"#ECE9D8\" style=\"padding: 30px 30px 30px 30px;\"><table border=\"none !important\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\"><tr><td width=\"40%\"><a style=\"font-family:arial,helvetica,sans-serif; font-size: 10px;\">This notification was sent because you requested registration at Fleetbooks for Tamrio.<br></br>Developed by RAD Solutions</a></td><td align=\"right\"><a style=\"font-family:arial,helvetica,sans-serif; font-size: 10px;\">Parque Industrial del Oeste#31 Rochelaise<br>Mayaguez, P.R. 00682 <br>Tel. (787) 805-4120</a> </td></tr></table></td></tr></table></td></tr></table></body>" +
 				"</html>");
 
 		// Map Application Images to HTML document.
 		Map<String, String> inlineImages = new HashMap<String, String>();
 		inlineImages.put("image1", System.getProperty("user.dir")+
 						 "/WebContent/images/logoTamrio.gif");
-		inlineImages.put("image2", System.getProperty("user.dir")+
-						 "/WebContent/images/equipment.png");
-		//inlineImages.put("image3", System.getProperty("user.dir")+
-		//				 "/WebContent/images/email.png");
+				
 		inlineImages.put("image4", System.getProperty("user.dir")+
 						 "/WebContent/images/fleetbooks_logo.png");
 
+		// Get all administrators
 		ArrayList<Account> admins = AccountManager.getInstance().getAllAdministrators();
 		// Send e-mail to all administrators
 		for (int i= 0; i<admins.size(); i++)
@@ -255,6 +254,109 @@ public class MailManager
 		}
 	}
 
+	
+	/**
+	 * Sends a formated e-mail to all of the system's administrators, that states
+	 * that an equipment is being requested for rent. Populates the HTML
+	 * e-mail with the equipment, project, and soliciter's data.
+	 * @param equipment - Equipment object belonging to requested unit
+	 * @param project - Project where equipment will be assigned
+	 * @param user - Account object belonging to the user that solicited
+	 * equipment.
+	 */
+	
+	public void sendEquipmentRequest(Equipment equipment, Project project, Account user)
+	{
+		/*
+		 * The following contains the HTML document that will be sent 
+		 * to the user through e-mail.
+		 */
+		StringBuffer body= new StringBuffer();
+		// Start of HTML
+		body.append("<html xmlns=\"http://www.w3.org/1999/xhtml\"><head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" /><title>New Account</title><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"/></head><body style=\"margin: 0; padding: 0;\"><table border=\"1\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\"><tr><td bgcolor=\"#7E091E \"><table align=\"center\" border=\"1\" cellpadding=\"0\" cellspacing=\"0\" width=\"600\"><tr><td align=\"center\" bgcolor=\"#ECE9D8\" style=\"padding: 40px 0 30px 0;\"><a href=\"www.tamrio.com\"><img src=\"cid:image1\" alt=\"Tamrio\" width=\"265px\"height=\"59px\" style=\"display: block;\" /></a></td></tr><tr><td bgcolor=\"#ffffff\" style=\"padding: 40px 30px 40px 30px;\"><table border=\"none !important\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"font-family:Georgia,serif; color:#4E443C; font-variant: small-caps; text-transform: none; font-weight: 100; margin-bottom: 0;\"><tr><td align=\"center\" style=\"padding: " +
+				"25px 0 25px 0; font-size:20px\">");
+		// Include Project Name
+		body.append("Equipment request for Project: "+project.getName());
+		body.append("</td></tr><tr><td align=\"center\" style=\"padding: 5px 0 25px 0; font-size:12px\"></td></tr><tr><td><table border=\"none !important\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\"><tr><td style=\"padding:10px 0px 10px 30px;\"><a ><img src=\"cid:image2\" />");
+		// Include username 
+		body.append("Requester: "+user.getEmail());	
+		body.append("</a></td></tr><tr><td style=\"padding:10px 0px 10px 30px;\"><a><img src=\"cid:image3\" />");
+		// Include equipment name
+		body.append("Equipment: "+equipment.getCompanyId());
+		// Rest of HTML
+		body.append("</a></td></tr><tr><td align=\"center\" style=\"padding:10px 0px 10px 30px;\"><a href=\"http://ec2-54-214-69-174.us-west-2.compute.amazonaws.com:8080/FleetBooksDB/\"> <img src=\"cid:image4\" /></a></td></tr></table></td></tr></table></td></tr><tr><td bgcolor=\"#ECE9D8\" style=\"padding: 30px 30px 30px 30px;\"><table border=\"none !important\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\"><tr><td width=\"40%\"><a style=\"font-family:arial,helvetica,sans-serif; font-size: 10px;\">This notification was sent because you requested registration at Fleetbooks for Tamrio.<br></br>Developed by RAD Solutions</a></td><td align=\"right\"><a style=\"font-family:arial,helvetica,sans-serif; font-size: 10px;\">Parque Industrial del Oeste#31 Rochelaise<br>Mayaguez, P.R. 00682 <br>Tel. (787) 805-4120</a> </td></tr></table></td></tr></table></td></tr></table></body>" +
+				"</html>");
+
+		// Map Application Images to HTML document.
+		Map<String, String> inlineImages = new HashMap<String, String>();
+		inlineImages.put("image1", System.getProperty("user.dir")+
+						 "/WebContent/images/logoTamrio.gif");
+		inlineImages.put("image2", System.getProperty("user.dir")+
+						"/WebContent/images/user.png");
+		inlineImages.put("image3", System.getProperty("user.dir")+
+				 		"/WebContent/images/equipment.png");		
+		inlineImages.put("image4", System.getProperty("user.dir")+
+						 "/WebContent/images/fleetbooks_logo.png");
+
+		ArrayList<Account> admins = AccountManager.getInstance().getAllAdministrators();
+		// Send e-mail to all administrators
+		for (int i= 0; i<admins.size(); i++)
+		{
+			MailManager.getInstance().send(admins.get(i).getEmail(), "Equipment Request for Project -  " +
+				project.getName(), body.toString(), inlineImages);
+		}
+	}
+
+	/**
+	 * Sends a formated e-mail to all of the system's administrators, that states
+	 * that an equipment is being checked out. Populates the HTML
+	 * e-mail with the equipment and project data.
+	 * @param equipment - Equipment object checked out
+	 * @param project - Project that had equipment prior to checkout
+	 * @param endDate - Date of checkout.
+	 */
+	
+	public void sendEquipmentCheckoutRequest(Equipment equipment, Project project, String endDate)
+	{
+		/*
+		 * The following contains the HTML document that will be sent 
+		 * to the user through e-mail.
+		 */
+		StringBuffer body= new StringBuffer();
+		// Start of HTML
+		body.append("<html xmlns=\"http://www.w3.org/1999/xhtml\"><head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" /><title>New Account</title><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"/></head><body style=\"margin: 0; padding: 0;\"><table border=\"1\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\"><tr><td bgcolor=\"#7E091E \"><table align=\"center\" border=\"1\" cellpadding=\"0\" cellspacing=\"0\" width=\"600\"><tr><td align=\"center\" bgcolor=\"#ECE9D8\" style=\"padding: 40px 0 30px 0;\"><a href=\"www.tamrio.com\"><img src=\"cid:image1\" alt=\"Tamrio\" width=\"265px\"height=\"59px\" style=\"display: block;\" /></a></td></tr><tr><td bgcolor=\"#ffffff\" style=\"padding: 40px 30px 40px 30px;\"><table border=\"none !important\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"font-family:Georgia,serif; color:#4E443C; font-variant: small-caps; text-transform: none; font-weight: 100; margin-bottom: 0;\"><tr><td align=\"center\" style=\"padding: " +
+				"25px 0 25px 0; font-size:20px\">");
+		// Include Equipment Name and End Date
+		body.append("Equipment "+equipment.getCompanyId()+" checkeout at: "+endDate);
+		body.append("</td></tr><tr><td align=\"center\" style=\"padding: 5px 0 25px 0; font-size:12px\"></td></tr><tr><td><table border=\"none !important\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\"><tr><td style=\"padding:10px 0px 10px 30px;\"><a ><img src=\"cid:image2\" />");
+		// Include Engineer's Name 
+		body.append("Project Engineer: "+project.getEngineer());	
+		body.append("</a></td></tr><tr><td style=\"padding:10px 0px 10px 30px;\"><a><img src=\"cid:image3\" />");
+		// Include equipment name
+		body.append("Project: "+project.getName());
+		// Rest of HTML
+		body.append("</a></td></tr><tr><td align=\"center\" style=\"padding:10px 0px 10px 30px;\"><a href=\"http://ec2-54-214-69-174.us-west-2.compute.amazonaws.com:8080/FleetBooksDB/\"> <img src=\"cid:image4\" /></a></td></tr></table></td></tr></table></td></tr><tr><td bgcolor=\"#ECE9D8\" style=\"padding: 30px 30px 30px 30px;\"><table border=\"none !important\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\"><tr><td width=\"40%\"><a style=\"font-family:arial,helvetica,sans-serif; font-size: 10px;\">This notification was sent because you requested registration at Fleetbooks for Tamrio.<br></br>Developed by RAD Solutions</a></td><td align=\"right\"><a style=\"font-family:arial,helvetica,sans-serif; font-size: 10px;\">Parque Industrial del Oeste#31 Rochelaise<br>Mayaguez, P.R. 00682 <br>Tel. (787) 805-4120</a> </td></tr></table></td></tr></table></td></tr></table></body>" +
+				"</html>");
+
+		// Map Application Images to HTML document.
+		Map<String, String> inlineImages = new HashMap<String, String>();
+		inlineImages.put("image1", System.getProperty("user.dir")+
+						 "/WebContent/images/logoTamrio.gif");
+		inlineImages.put("image2", System.getProperty("user.dir")+
+						"/WebContent/images/user.png");
+		inlineImages.put("image3", System.getProperty("user.dir")+
+				 		"/WebContent/images/equipment.png");		
+		inlineImages.put("image4", System.getProperty("user.dir")+
+						 "/WebContent/images/fleetbooks_logo.png");
+
+		ArrayList<Account> admins = AccountManager.getInstance().getAllAdministrators();
+		// Send e-mail to all administrators
+		for (int i= 0; i<admins.size(); i++)
+		{
+			MailManager.getInstance().send(admins.get(i).getEmail(), "Equipment Checkout for Project -  " +
+				project.getName(), body.toString(), inlineImages);
+		}
+	}
 
 
 	/**
@@ -284,7 +386,7 @@ public class MailManager
 		// Include username
 		body.append("Username: "+user.getEmail());
 		// Rest of HTML
-		body.append("</a></td></tr><tr><td align=\"center\" style=\"padding:10px 0px 10px 30px;\"><a href=\"#\"> <img src=\"cid:image4\" /></a></td></tr></table></td></tr></table></td></tr><tr><td bgcolor=\"#ECE9D8\" style=\"padding: 30px 30px 30px 30px;\"><table border=\"none !important\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\"><tr><td width=\"40%\"><a style=\"font-family:arial,helvetica,sans-serif; font-size: 10px;\">This notification was sent because you requested registration at Fleetbooks for Tamrio.<br></br>Developed by RAD Solutions</a></td><td align=\"right\"><a style=\"font-family:arial,helvetica,sans-serif; font-size: 10px;\">Parque Industrial del Oeste#31 Rochelaise<br>Mayaguez, P.R. 00682 <br>Tel. (787) 805-4120</a> </td></tr></table></td></tr></table></td></tr></table></body>" +
+		body.append("</a></td></tr><tr><td align=\"center\" style=\"padding:10px 0px 10px 30px;\"><a href=\"http://ec2-54-214-69-174.us-west-2.compute.amazonaws.com:8080/FleetBooksDB/\"> <img src=\"cid:image4\" /></a></td></tr></table></td></tr></table></td></tr><tr><td bgcolor=\"#ECE9D8\" style=\"padding: 30px 30px 30px 30px;\"><table border=\"none !important\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\"><tr><td width=\"40%\"><a style=\"font-family:arial,helvetica,sans-serif; font-size: 10px;\">This notification was sent because you requested registration at Fleetbooks for Tamrio.<br></br>Developed by RAD Solutions</a></td><td align=\"right\"><a style=\"font-family:arial,helvetica,sans-serif; font-size: 10px;\">Parque Industrial del Oeste#31 Rochelaise<br>Mayaguez, P.R. 00682 <br>Tel. (787) 805-4120</a> </td></tr></table></td></tr></table></td></tr></table></body>" +
 				"</html>");
 
 		// Map Application Images to HTML document.
@@ -307,6 +409,55 @@ public class MailManager
 		}
 	}
 
+	/**
+	 * Sends a formated e-mail to all of the system's administrators, that states
+	 * that an equipment is in need of maintenance. Populates the HTML
+	 * e-mail with the equipment's data.
+	 * @param equipment - Equipment object corresponding to the malfunctioned unit.
+	 * @param sender - Name of Account user that reported malfunctioned unit. 
+	 */
+	
+	public void sendUnitMalfunctionNotification(Equipment equipment, String sender)
+	{
+		/*
+		 * The following contains the HTML document that will be sent 
+		 * to the user through e-mail.
+		 */
+		StringBuffer body= new StringBuffer();
+		// Start of HTML
+		body.append("<html xmlns=\"http://www.w3.org/1999/xhtml\"><head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" /><title>New Account</title><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"/></head><body style=\"margin: 0; padding: 0;\"><table border=\"1\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\"><tr><td bgcolor=\"#7E091E \"><table align=\"center\" border=\"1\" cellpadding=\"0\" cellspacing=\"0\" width=\"600\"><tr><td align=\"center\" bgcolor=\"#ECE9D8\" style=\"padding: 40px 0 30px 0;\"><a href=\"www.tamrio.com\"><img src=\"cid:image1\" alt=\"Tamrio\" width=\"265px\"height=\"59px\" style=\"display: block;\" /></a></td></tr><tr><td bgcolor=\"#ffffff\" style=\"padding: 40px 30px 40px 30px;\"><table border=\"none !important\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"font-family:Georgia,serif; color:#4E443C; font-variant: small-caps; text-transform: none; font-weight: 100; margin-bottom: 0;\"><tr><td align=\"center\" style=\"padding: " +
+				"25px 0 25px 0; font-size:20px\">");
+		// Include request type
+		body.append("Equipment Malfunction: "+ equipment.getCompanyId());
+		body.append("</td></tr><tr><td align=\"center\" style=\"padding: 5px 0 25px 0; font-size:12px\"></td></tr><tr><td><table border=\"none !important\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\"><tr><td style=\"padding:10px 0px 10px 30px;\"><a style=\"font-variant:normal;\"><img src=\"cid:image2\" style=\"padding: 0 0 0 30px;\"/>");
+		// Include user's name 
+		body.append("Name: "+sender);	
+		body.append("</a></td></tr><tr><td style=\"padding:10px 0px 10px 30px;\"><a style=\"font-variant:normal;\"><img src=\"cid:image3\" style=\"padding: 0 0 0 30px;\"/>");
+		// Include equipment note
+		body.append("Equipment Note: "+equipment.getNote());
+		// Rest of HTML
+		body.append("</a></td></tr><tr><td align=\"center\" style=\"padding:10px 0px 10px 30px;\"><a href=\"http://ec2-54-214-69-174.us-west-2.compute.amazonaws.com:8080/FleetBooksDB/\"> <img src=\"cid:image4\" /></a></td></tr></table></td></tr></table></td></tr><tr><td bgcolor=\"#ECE9D8\" style=\"padding: 30px 30px 30px 30px;\"><table border=\"none !important\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\"><tr><td width=\"40%\"><a style=\"font-family:arial,helvetica,sans-serif; font-size: 10px;\">This notification was sent because you requested registration at Fleetbooks for Tamrio.<br></br>Developed by RAD Solutions</a></td><td align=\"right\"><a style=\"font-family:arial,helvetica,sans-serif; font-size: 10px;\">Parque Industrial del Oeste#31 Rochelaise<br>Mayaguez, P.R. 00682 <br>Tel. (787) 805-4120</a> </td></tr></table></td></tr></table></td></tr></table></body>" +
+				"</html>");
+
+		// Map Application Images to HTML document.
+		Map<String, String> inlineImages = new HashMap<String, String>();
+		inlineImages.put("image1", System.getProperty("user.dir")+
+						 "/WebContent/images/logoTamrio.gif");
+		inlineImages.put("image2", System.getProperty("user.dir")+
+						 "/WebContent/images/user.png");
+		inlineImages.put("image3", System.getProperty("user.dir")+
+						 "/WebContent/images/equipment.png");
+		inlineImages.put("image4", System.getProperty("user.dir")+
+						 "/WebContent/images/fleetbooks_logo.png");
+
+		ArrayList<Account> admins = AccountManager.getInstance().getAllAdministrators();
+		// Send e-mail to all administrators
+		for (int i= 0; i<admins.size(); i++)
+		{
+			MailManager.getInstance().send(admins.get(i).getEmail(), "Equipment Malfunction - Equipment: " +
+				equipment.getCompanyId(), body.toString(), inlineImages);
+		}
+	}
 
 	/**
 	 * Sends a formated e-mail that states that the account for an
@@ -335,7 +486,7 @@ public class MailManager
 		// Include user's password
 		body.append("Password: "+user.getPassword());
 		// Rest of HTML
-		body.append("</a></td></tr><tr><td align=\"center\" style=\"padding:10px 0px 10px 30px;\"><a href=\"#\"> <img src=\"cid:image4\" /></a></td></tr></table></td></tr></table></td></tr><tr><td bgcolor=\"#ECE9D8\" style=\"padding: 30px 30px 30px 30px;\"><table border=\"none !important\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\"><tr><td width=\"40%\"><a style=\"font-family:arial,helvetica,sans-serif; font-size: 10px;\">This notification was sent because you requested registration at Fleetbooks for Tamrio.<br></br>Developed by RAD Solutions</a></td><td align=\"right\"><a style=\"font-family:arial,helvetica,sans-serif; font-size: 10px;\">Parque Industrial del Oeste#31 Rochelaise<br>Mayaguez, P.R. 00682 <br>Tel. (787) 805-4120</a> </td></tr></table></td></tr></table></td></tr></table></body>" +
+		body.append("</a></td></tr><tr><td align=\"center\" style=\"padding:10px 0px 10px 30px;\"><a href=\"http://ec2-54-214-69-174.us-west-2.compute.amazonaws.com:8080/FleetBooksDB/\"> <img src=\"cid:image4\" /></a></td></tr></table></td></tr></table></td></tr><tr><td bgcolor=\"#ECE9D8\" style=\"padding: 30px 30px 30px 30px;\"><table border=\"none !important\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\"><tr><td width=\"40%\"><a style=\"font-family:arial,helvetica,sans-serif; font-size: 10px;\">This notification was sent because you requested registration at Fleetbooks for Tamrio.<br></br>Developed by RAD Solutions</a></td><td align=\"right\"><a style=\"font-family:arial,helvetica,sans-serif; font-size: 10px;\">Parque Industrial del Oeste#31 Rochelaise<br>Mayaguez, P.R. 00682 <br>Tel. (787) 805-4120</a> </td></tr></table></td></tr></table></td></tr></table></body>" +
 				"</html>");
 
 		// Map Application Images to HTML document.
@@ -354,30 +505,53 @@ public class MailManager
 				"activated!", body.toString(), inlineImages);
 
 	}
+	
+	
+	/**
+	 * Sends a formated e-mail that states that a recovery link has
+	 * been provided for a user. This e-mail includes the user's username
+	 * and recovery link. It is sent to the e-mail corresponding to the 
+	 * provided Account object.
+	 * @param user - Account object that holds user's information
+	 * @param url - Contains URL for password recovery service with embedded key.
+	 */
+	public void sendPasswordRecoveryLink(Account user, String url)
+	{
 
+		/*
+		 * The following contains the HTML document that will be sent 
+		 * to the user through e-mail.
+		 */
+		StringBuffer body= new StringBuffer();
+		// Start of HTML
+		body.append("<html xmlns=\"http://www.w3.org/1999/xhtml\"><head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" /><title>New Account</title><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"/></head><body style=\"margin: 0; padding: 0;\"><table border=\"1\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\"><tr><td bgcolor=\"#7E091E \"><table align=\"center\" border=\"1\" cellpadding=\"0\" cellspacing=\"0\" width=\"600\"><tr><td align=\"center\" bgcolor=\"#ECE9D8\" style=\"padding: 40px 0 30px 0;\"><a href=\"www.tamrio.com\"><img src=\"cid:image1\" alt=\"Tamrio\" width=\"265px\"height=\"59px\" style=\"display: block;\" /></a></td></tr><tr><td bgcolor=\"#ffffff\" style=\"padding: 40px 30px 40px 30px;\"><table border=\"none !important\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"font-family:Georgia,serif; color:#4E443C; font-variant: small-caps; text-transform: none; font-weight: 100; margin-bottom: 0;\"><tr><td align=\"center\" style=\"padding: " +
+				"25px 0 25px 0; font-size:20px\">");
+		// Include user's first name in the e-mail
+		body.append("A password recovery link has been created for you, "+user.getFirstName()+"!");
+		body.append("</td></tr><tr><td align=\"center\" style=\"padding: 5px 0 25px 0; font-size:12px\">Get back to managing data in Fleetbooks!</td></tr><tr><td><table border=\"none !important\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\"><tr><td style=\"padding:10px 0px 10px 30px;\"><a style=\"font-variant:normal;\"><img src=\"cid:image2\" style=\"padding: 0 0 0 30px;\"/>");
+		// Include user's email 
+		body.append("Username: "+user.getEmail());	
+		body.append("</a></td></tr><tr><td style=\"padding:10px 0px 10px 30px;\"><a style=\"font-variant:normal;\"><img src=\"cid:image3\" style=\"padding: 0 0 0 30px;\"/>");
+		// Include recovery link
+		body.append("Link to reset password: <a href=\""+url+"\"> Reset Pass Now! </a>");
+		// Rest of HTML
+		body.append("</a></td></tr><tr><td align=\"center\" style=\"padding:10px 0px 10px 30px;\"><a href=\"http://ec2-54-214-69-174.us-west-2.compute.amazonaws.com:8080/FleetBooksDB/\"> <img src=\"cid:image4\" /></a></td></tr></table></td></tr></table></td></tr><tr><td bgcolor=\"#ECE9D8\" style=\"padding: 30px 30px 30px 30px;\"><table border=\"none !important\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\"><tr><td width=\"40%\"><a style=\"font-family:arial,helvetica,sans-serif; font-size: 10px;\">This notification was sent because you requested registration at Fleetbooks for Tamrio.<br></br>Developed by RAD Solutions</a></td><td align=\"right\"><a style=\"font-family:arial,helvetica,sans-serif; font-size: 10px;\">Parque Industrial del Oeste#31 Rochelaise<br>Mayaguez, P.R. 00682 <br>Tel. (787) 805-4120</a> </td></tr></table></td></tr></table></td></tr></table></body>" +
+				"</html>");
 
+		// Map Application Images to HTML document.
+		Map<String, String> inlineImages = new HashMap<String, String>();
+		inlineImages.put("image1", System.getProperty("user.dir")+
+						 "/WebContent/images/logoTamrio.gif");
+		inlineImages.put("image2", System.getProperty("user.dir")+
+						 "/WebContent/images/user.png");
+		inlineImages.put("image3", System.getProperty("user.dir")+
+						 "/WebContent/images/lock.png");
+		inlineImages.put("image4", System.getProperty("user.dir")+
+						 "/WebContent/images/fleetbooks_logo.png");
 
-
-
-	public static void main(String[] args){
-		//MailManager mm = new MailManager();
-		//mm.sendEmail("noreply.fleetbooks@gmail.com", "test", "success");
-
-
-
-		Account user = new Account();
-		user.setEmail("noreply.fleetbooks@gmail.com");
-		user.setFirstName("Tito");
-		user.setPassword("pass");
-		user.setType("General User");
-		user.setLastName("Tamrio");
-		
-		//MailManager.getInstance().sendNewAccountCompletionNotification(user);
-		//MailManager.getInstance().sendNewAccountNotification(user);
-		ArrayList<Part> testParts = PartManager.getInstance().getAllParts();
-		//Equipment testEquipment = EquipmentManager.getInstance().getEquipmentById(testPart.getParentEquipment());
-		//MailManager.getInstance().sendMaintenanceNotification(testEquipment, testPart);
+		// Send e-mail
+		MailManager.getInstance().send(user.getEmail(), "Your Fleetbooks account password " +
+				"recovery link is ready!", body.toString(), inlineImages);
 
 	}
-
 }
