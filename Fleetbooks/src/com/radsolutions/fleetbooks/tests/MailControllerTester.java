@@ -1,5 +1,4 @@
 package com.radsolutions.fleetbooks.tests;
-
 import com.radsolutions.fleetbooks.DTO.Account;
 import com.radsolutions.fleetbooks.DTO.Equipment;
 import com.radsolutions.fleetbooks.DTO.Part;
@@ -32,7 +31,7 @@ public final class MailControllerTester
   		testProject = ProjectManager.getInstance().getAllProjects().get(0);
   		testEquipment = EquipmentManager.getInstance().getEquipmentInProject(testProject.getId()).get(0);
   		testUser = new Account();
-  		testUser.setEmail("noreply.fleetbooks@gmail.com");
+  		testUser.setEmail("fernando.valverde@upr.eduop");
   	  	testUser.setFirstName("Noreply");
   	  	testUser.setPassword("pass");
   	  	testUser.setType("General User");
@@ -91,13 +90,14 @@ public final class MailControllerTester
 	public static void main(String[] args){
 		//Remove comment of desired test.
 		MailControllerTester mailTester = new MailControllerTester();
-		//mailTester.testAccountCompletion();
+		mailTester.testAccountCompletion();
 		//mailTester.testAccountCreation();
 		//mailTester.testEquipmentRequest();
 		//mailTester.testMaintenance();
 		//mailTester.testEquipmentCheckout();
 		//mailTester.testUnitMalfunction();
-		mailTester.testPasswordRecoveryLink();
+		//mailTester.testPasswordRecoveryLink();
+		System.out.println("Done");
 	}
 
 }
